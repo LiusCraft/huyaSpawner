@@ -1,0 +1,83 @@
+radius: 20
+maxTryTimes: 1000
+# 直播间房间号
+roomId: 301176
+# 主播用户ID (如果ID==0则代表不开启)
+huYaId: 1199512582516
+# 订阅一次几只怪
+subscription: 1
+# 怪物多时是否随机分布到多个玩家位置（如果不开启则怪物则针对一个玩家位置）
+multiPlayer: true
+# 分享直播间来刷怪
+shareLiveNotice: true
+# 分享多少次一只怪
+shareCount: 5
+# 是否显示直播间聊天信息
+showChat: false
+# 根据金额来刷怪
+moneySpawner: true
+# 累计金额 (他与单个用户礼物金额刷怪不冲突，0代表不开启)
+totalMoneySpawner: 0
+# 根据礼物来刷怪
+giftSpawner: false
+# 根据弹幕刷怪 (barrage内配置弹幕刷怪条件)
+barrageSpawner: true
+# 一百条弹幕一只怪
+barrageCount: 100
+# 一只怪的金豆
+money: 1000
+# BOSS出现条件（累计>=多少金额)
+totalMoney: 1000000
+
+# 礼物的信息 [礼物ID;价值金额;礼物名称]
+gift:
+  #- "4;10;虎粮"
+  - "20114;100;炮竹"
+  - "20493;6600;糖豆车"
+  - "20495;1000000;银河之光"
+  - "20206;100;荧光棒"
+  - "20501;66000;告白灯牌"
+  - "20369;520000;告白气球"
+  - "20269;1000000;虎牙一号"
+  - "20391;5000000;浪漫热气球"
+  - "20427;100;小心心"
+  - "20275;6600;奖杯"
+  - "20277;6600;血瓶"
+  - "20273;66000;火锅"
+  - "20279;88000;高能预警"
+  - "20271;99000;魔法书"
+  - "20267;300000;钞票枪"
+  - "12;5000000;藏宝图"
+  - "20200;100;超火"
+  - "20317;6600;夏天卡"
+  - "20459;6600;星光卡"
+  - "20409;6600;钻心"
+  - "20349;660000;守护之盾"
+  - "20425;5000000;海洋之心"
+
+# 指定怪物生成方式 [怪物英文名;n](n=距离玩家的方格数)
+monsterLocation:
+  - "creeper;1"
+
+# 弹幕刷怪条件表 [弹幕内容;出现次数] (条件成立即可出现一只怪)
+barrage:
+  - "海草;500"
+  - "六芒猫;500"
+
+# 下面是根据 BiliFansAction 插件来的功能
+enableItemDrops: false
+disableMonsters: false
+forbiddenItems:
+  - AIR
+  - VOID_AIR
+  - CAVE_AIR
+  - BEDROCK
+  - COMMAND_BLOCK
+  - BARRIER
+  - JIGSAW
+  - STRUCTURE_BLOCK
+  - STRUCTURE_VOID
+  - WATER
+  - LAVA
+  - PISTON_HEAD
+  - MOVING_PISTON

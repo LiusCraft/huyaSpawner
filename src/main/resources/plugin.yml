@@ -1,0 +1,13 @@
+name: HuyaHandler
+version: 2.2
+main: org.liuscraft.huyahandler.HuyaHandlerMain
+api-version: 1.16
+authors: [ LiusCraft ]
+
+commands:
+  bilifansaction:
+    aliases: [hyh]
+    usage: /<command> help
+    permission: huyahandler.main
+    description: HuYaHandler main command
+
