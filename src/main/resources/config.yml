@@ -2,16 +2,8 @@ radius: 20
 maxTryTimes: 1000
 # 直播间房间号
 roomId: 301176
-# 主播用户ID (如果ID==0则代表不开启)
-huYaId: 1199512582516
-# 订阅一次几只怪
-subscription: 1
 # 怪物多时是否随机分布到多个玩家位置（如果不开启则怪物则针对一个玩家位置）
 multiPlayer: true
-# 分享直播间来刷怪
-shareLiveNotice: true
-# 分享多少次一只怪
-shareCount: 5
 # 是否显示直播间聊天信息
 showChat: false
 # 根据金额来刷怪
@@ -20,10 +12,6 @@ moneySpawner: true
 totalMoneySpawner: 0
 # 根据礼物来刷怪
 giftSpawner: false
-# 根据弹幕刷怪 (barrage内配置弹幕刷怪条件)
-barrageSpawner: true
-# 一百条弹幕一只怪
-barrageCount: 100
 # 一只怪的金豆
 money: 1000
 # BOSS出现条件（累计>=多少金额)
@@ -58,26 +46,3 @@ gift:
 # 指定怪物生成方式 [怪物英文名;n](n=距离玩家的方格数)
 monsterLocation:
   - "creeper;1"
-
-# 弹幕刷怪条件表 [弹幕内容;出现次数] (条件成立即可出现一只怪)
-barrage:
-  - "海草;500"
-  - "六芒猫;500"
-
-# 下面是根据 BiliFansAction 插件来的功能
-enableItemDrops: false
-disableMonsters: false
-forbiddenItems:
-  - AIR
-  - VOID_AIR
-  - CAVE_AIR
-  - BEDROCK
-  - COMMAND_BLOCK
-  - BARRIER
-  - JIGSAW
-  - STRUCTURE_BLOCK
-  - STRUCTURE_VOID
-  - WATER
-  - LAVA
-  - PISTON_HEAD
-  - MOVING_PISTON

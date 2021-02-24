@@ -1,19 +1,15 @@
 package org.liuscraft.huyahandler;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.java_websocket.enums.ReadyState;
 import org.liuscraft.huyahandler.listen.PlayerListen;
-import org.liuscraft.huyahandler.utils.HuyaDinYue;
 import org.liuscraft.huyahandler.utils.MessageUtils;
-import org.liuscraft.huyahandler.utils.MobSpawnUtils;
 import org.liuscraft.huyahandler.utils.ParamsUtil;
 
 import java.io.File;
@@ -31,11 +27,7 @@ public class HuyaHandlerMain extends JavaPlugin {
     public static int totalMoneys = 0;
     public static boolean moneySp = false;
     public static boolean giftSp = false;
-    public static int sharerCount = 0;
-    public static HashMap<String, Integer> barrageCountList = new HashMap<String, Integer>();
     public static long runnableTime = 0;
-    public static HuyaDinYue huyaDinYue;
-    public static int barrageCount = 0;
     public static boolean actionBarAwait = false;
     public static int mb = 1;
     public static HashMap<String, Location> deathLocationList= new HashMap<String, Location>();
@@ -52,46 +44,6 @@ public class HuyaHandlerMain extends JavaPlugin {
             public void run() {
                 MessageUtils.log("启动监听线程!");
                 new Thread(HuyaHandlerMain.fanTask).start();
-                new Thread(new Runnable() {
-                    public void run() {
-                        huyaDinYue = new HuyaDinYue();
-                        long id = getConfig().getLong("huYaId");
-                        if (id < 1){
-                            MessageUtils.log("虎牙主播订阅模式未开启");
-                            return;
-                        }
-                        if(huyaDinYue.initDinYue(id)){
-                            MessageUtils.log("虎牙主播订阅模式已开启");
-                            int radius = HuyaHandlerMain.instance.getConfig().contains("radius") ? HuyaHandlerMain.instance.getConfig().getInt("radius") : 30;
-                            int maxTryTimes = HuyaHandlerMain.instance.getConfig().contains("maxTryTimes") ? HuyaHandlerMain.instance.getConfig().getInt("maxTryTimes") : 200;
-                            while (true) {
-                                try {
-                                    Thread.sleep(5000);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                                int i = huyaDinYue.getNewDinYue();
-                                if (i>0){
-                                    final Collection<? extends Player> onlinePlayers = (Collection<? extends Player>) Bukkit.getOnlinePlayers();
-                                    if (onlinePlayers.isEmpty()){
-                                        continue;
-                                    }
-                                    final int r = new Random().nextInt(onlinePlayers.size());
-                                    Player player = onlinePlayers.toArray(new Player[0])[r];
-                                    for (int j = 0; j < (i/instance.getConfig().getInt("subscription", 1)); j++) {
-                                        MobSpawnUtils.spawnMob(player, radius, maxTryTimes);
-                                        if (HuyaHandlerMain.instance.getConfig().getBoolean("multiPlayer")){
-                                            player = onlinePlayers.toArray(new Player[0])[new Random().nextInt(onlinePlayers.size())];
-                                        }
-                                    }
-                                    MessageUtils.sendActionBar("&a主播增加了 §c§l"+i+"§6§l个订阅数 §6§l召唤了 §c§l"+i+" §6§l只怪！", 3, true);
-                                }
-                            }
-                        }else {
-                            MessageUtils.log("虎牙主播订阅模式未开启");
-                        }
-                    }
-                }).start();
             }
         }.runTaskAsynchronously(HuyaHandlerMain.instance);
         new BukkitRunnable(){
@@ -100,6 +52,7 @@ public class HuyaHandlerMain extends JavaPlugin {
                 if (runnableTime % (20*60) == 0){
                     MessageUtils.send("● 作者(B站): LiusCraft_TOP");
                     MessageUtils.send( "· (B站): 六芒猫");
+                    MessageUtils.send( "· (B站): 夏天y");
                 }
                 if (runnableTime% (2)==0){
                     String message = "";
@@ -110,25 +63,6 @@ public class HuyaHandlerMain extends JavaPlugin {
                                 int ci = HuyaHandlerMain.totalMoney/deftotalS;
                                 message += " ● &e累积礼物&f(&a"+(HuyaHandlerMain.totalMoney-deftotalS*ci)+"&f/&e"+deftotalS+"&f)"+message;
                             }
-                        }
-                        if (getConfig().getBoolean("shareLiveNotice", false)){
-                            if (getConfig().getInt("shareCount", 0)>0){
-                                message += " ● &d累计分享&f(&a"+sharerCount+"&f/&e"+getConfig().getInt("shareCount", 0)+"&f)";
-                            }
-                        }
-                        if (getConfig().getBoolean("barrageSpawner", false)){
-                            if (getConfig().getInt("barrageCount", 0)>0){
-                                int d = getConfig().getInt("barrageCount", 0);
-                                message += " ● &c累计弹幕&f(&a"+(barrageCount - (barrageCount/d)*d)+"&f/&e"+d+"&f)";
-                            }
-                        }
-                    }
-                    if (mb==2){
-                        int deftotal = getConfig().getInt("totalMoney", 0);
-                        int cii = HuyaHandlerMain.totalMoney/deftotal;
-                        message += " ● &c距离BOSS出现&f(&a"+(HuyaHandlerMain.totalMoney-deftotal*cii)+"&f/&e"+deftotal+"&f)";
-                        if (huyaDinYue!=null&&huyaDinYue.getDinYueShu()>0){
-                            message += " ● &d订阅&f(&a"+huyaDinYue.getDinYueShu()+"&f)";
                         }
                     }
                     MessageUtils.sendActionBar(message, 2);
@@ -174,15 +108,7 @@ public class HuyaHandlerMain extends JavaPlugin {
             }else if ("reload".equals(args[0])){
                 reloadConfig();
                 MessageUtils.send("重载成功！",sender);
-            }else if ("1".equals(args[0])){
-                mb = 1;
-                MessageUtils.send("面板切换成功", sender);
-            } else if ("2".equals(args[0])){
-                mb = 2;
-                MessageUtils.send("面板切换成功", sender);
-            } else if("t".equalsIgnoreCase(args[0])){
-                MobSpawnUtils.spawnEntity(EntityType.ZOMBIE, ((Player)sender).getLocation());
-            } else {
+            }else {
                 MessageUtils.send("错误的指令",sender);
             }
         } else if (args.length==2){

@@ -52,10 +52,6 @@ public class MobSpawnUtils
     }
 
     public static void spawnEntity(final EntityType entityType, final Location location) {
-
-        if (HuyaHandlerMain.instance.getConfig().getBoolean("enableItemDrops", false)) {
-            ItemSpawnUtils.spawnRandomItem(location);
-        }
         if (!HuyaHandlerMain.instance.getConfig().getBoolean("disableMonsters", false)) {
             new BukkitRunnable() {
                 public void run() {
