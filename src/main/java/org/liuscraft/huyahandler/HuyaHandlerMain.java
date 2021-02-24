@@ -97,10 +97,6 @@ public class HuyaHandlerMain extends JavaPlugin {
         new BukkitRunnable(){
             public void run() {
                 runnableTime++;
-                if (runnableTime % (20*60) == 0){
-                    MessageUtils.send("● 作者(B站): LiusCraft_TOP");
-                    MessageUtils.send( "· (B站): 六芒猫");
-                }
                 if (runnableTime% (2)==0){
                     String message = "";
                     if (mb==1){
