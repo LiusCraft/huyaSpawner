@@ -19,7 +19,16 @@ public class MobSpawnUtils
 {
     public static List<EntityType> entityTypes;
     public static EntityType boss_wither;
-
+    public static List<String> nameList;
+    static {
+        nameList = new ArrayList<String>();
+        nameList.add("夏天y");
+        nameList.add("LiusCraft");
+        nameList.add("六芒猫");
+        nameList.add("盖亚");
+        nameList.add("迪迦");
+        nameList.add("死ね");
+    }
     public static void spawnMob(final Player player, final int radius, final int maxTryTime) {
         final EntityType entityType = randomMob();
         for (int i = 0; i < maxTryTime; ++i) {
@@ -50,12 +59,17 @@ public class MobSpawnUtils
         if (!HuyaHandlerMain.instance.getConfig().getBoolean("disableMonsters", false)) {
             new BukkitRunnable() {
                 public void run() {
+                    GiantEntity.spawn((Entity)new GiantEntity((World)((CraftWorld)location.getWorld()).getHandle()), location);
                     if (entityType == EntityType.GIANT) {
-
                         GiantEntity.spawn((Entity)new GiantEntity((World)((CraftWorld)location.getWorld()).getHandle()), location);
                     }
                     else {
-                        location.getWorld().spawnEntity(location, entityType);
+                        LivingEntity livingEntity = (LivingEntity) location.getWorld().spawnEntity(location, entityType);
+                        int i = new Random().nextInt(20)-1;
+                        if(nameList.get(i)!=null){
+                            livingEntity.setCustomName(nameList.get(i));
+                            livingEntity.setCustomNameVisible(true);
+                        }
                     }
                 }
             }.runTask((Plugin)HuyaHandlerMain.instance);

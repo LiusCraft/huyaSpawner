@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -179,6 +180,8 @@ public class HuyaHandlerMain extends JavaPlugin {
             } else if ("2".equals(args[0])){
                 mb = 2;
                 MessageUtils.send("面板切换成功", sender);
+            } else if("t".equalsIgnoreCase(args[0])){
+                MobSpawnUtils.spawnEntity(EntityType.ZOMBIE, ((Player)sender).getLocation());
             } else {
                 MessageUtils.send("错误的指令",sender);
             }

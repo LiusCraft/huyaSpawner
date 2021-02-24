@@ -11,21 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class GiantEntity extends EntityGiantZombie
+public class GiantEntity extends EntityZombie
 {
-    public static List<String> nameList;
-    static {
-        nameList = new ArrayList<String>();
-        nameList.add("夏天y");
-        nameList.add("六芒");
-        nameList.add("LiusCraft");
-        nameList.add("六芒猫");
-        nameList.add("盖亚");
-        nameList.add("迪迦");
-        nameList.add("死ね");
-    }
+
     public GiantEntity(final World var1) {
-        super(EntityTypes.GIANT, var1);
+        super(EntityTypes.ZOMBIE, var1);
     }
 
     public static void spawn(final Entity entity, final Location location) {
@@ -37,11 +27,6 @@ public class GiantEntity extends EntityGiantZombie
             livingEntity.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).setBaseValue(3.0);
             livingEntity.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(30.0);
             livingEntity.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).setBaseValue(0.2);
-            int i = new Random().nextInt(8)-1;
-            if(nameList.get(i)!=null){
-                livingEntity.setCustomName(nameList.get(i));
-                livingEntity.setCustomNameVisible(true);
-            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -64,6 +49,8 @@ public class GiantEntity extends EntityGiantZombie
         }
         this.targetSelector.a(3, (PathfinderGoal)new PathfinderGoalNearestAttackableTarget((EntityInsentient)this, (Class)EntityIronGolem.class, true));
         this.targetSelector.a(5, (PathfinderGoal)new PathfinderGoalNearestAttackableTarget((EntityInsentient)this, (Class)EntityTurtle.class, 10, true, false, EntityTurtle.bo));
+        Block block = new Block(BlockBase.Info.a(Material.STONE));
+        this.targetSelector.a(2, new PathfinderGoalRemoveBlock(block, this, 1.0, 1));
     }
 
     protected SoundEffect getSoundAmbient() {
