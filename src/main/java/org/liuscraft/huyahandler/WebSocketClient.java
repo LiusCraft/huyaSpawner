@@ -143,10 +143,53 @@ public class WebSocketClient extends org.java_websocket.client.WebSocketClient {
         	}
         	if ("getMessageNotice".equals(res.get("notice"))){
                 JSONObject data = JSONObject.parseObject(arg0).getJSONObject("data");
+
+                if (HuyaHandlerMain.instance.getConfig().getBoolean("barrageSpawner")){
+                    HuyaHandlerMain.barrageCount++;
+                    if (HuyaHandlerMain.barrageCount % HuyaHandlerMain.instance.getConfig().getInt("barrageCount") == 0){
+                        // 刷怪
+                        MessageUtils.sendActionBar("因为观众们在直播间说了"+HuyaHandlerMain.instance.getConfig().getInt("barrageCount")+"句话，所以生成了 1 只怪", 3,true);
+                        MobSpawnUtils.spawnMob(player, radius, maxTryTimes);
+                    }
+                    List<String> barrageList = HuyaHandlerMain.instance.getConfig().getStringList("barrage");
+                    if (barrageList!=null){
+                        for (String s : barrageList) {
+                            String[] sp = s.split(";");
+                            if (sp.length==2){
+                                if (!data.getString("content").contains(sp[0])){
+                                    continue;
+                                }
+                                Integer count = HuyaHandlerMain.barrageCountList.get(sp[0]);
+                                if (count == null){
+                                    count = 1;
+                                }else {
+                                    count++;
+                                }
+                                if (count.intValue() >= Integer.parseInt(sp[1])){
+                                    MessageUtils.sendActionBar("因大家都说 "+sp[0]+"，所以要来一只怪物了！", 3,true);
+                                    MobSpawnUtils.spawnMob(player, radius, maxTryTimes);
+                                    count = 0;
+                                }
+                                HuyaHandlerMain.barrageCountList.put(sp[0], count);
+                                break;
+                            }
+                        }
+                    }
+                }
                 if (!HuyaHandlerMain.instance.getConfig().getBoolean("showChat")){
                     return;
                 }
                 MessageUtils.send("["+data.getInteger("fansLevel")+"级]"+data.getString("sendNick")+": "+data.getString("content"));
+            }
+            if ("getShareLiveNotice".equals(res.get("notice"))&&HuyaHandlerMain.instance.getConfig().getBoolean("shareLiveNotice")){
+                JSONObject data = JSONObject.parseObject(arg0).getJSONObject("data");
+                HuyaHandlerMain.sharerCount++;
+                if (HuyaHandlerMain.sharerCount>=HuyaHandlerMain.instance.getConfig().getInt("shareCount")){
+                    MessageUtils.sendActionBar("因分享了"+HuyaHandlerMain.sharerCount+"次直播间，要来一只怪物了！", 3, true);
+                    MobSpawnUtils.spawnMob(player, radius, maxTryTimes);
+                    HuyaHandlerMain.sharerCount = 0;
+                }
+
             }
 		} catch (Exception e) {
 			System.out.println("-------- 数据处理异常 --------");
