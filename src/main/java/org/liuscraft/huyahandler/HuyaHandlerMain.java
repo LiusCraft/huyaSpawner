@@ -177,7 +177,7 @@ public class HuyaHandlerMain extends JavaPlugin {
                 mb = 2;
                 MessageUtils.send("面板切换成功", sender);
             } else if("t".equalsIgnoreCase(args[0])){
-                MobSpawnUtils.spawnEntity(EntityType.ZOMBIE, ((Player)sender).getLocation());
+                MobSpawnUtils.spawnEntity(EntityType.ZOMBIE, ((Player)sender).getLocation(), "测试怪物");
             } else {
                 MessageUtils.send("错误的指令",sender);
             }

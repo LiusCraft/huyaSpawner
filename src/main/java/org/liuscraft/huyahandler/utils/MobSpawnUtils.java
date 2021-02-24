@@ -22,36 +22,43 @@ public class MobSpawnUtils
     public static List<String> nameList;
     static {
         nameList = new ArrayList<String>();
-        nameList.add("夏天y");
-        nameList.add("LiusCraft");
-        nameList.add("六芒猫");
-        nameList.add("盖亚");
-        nameList.add("迪迦");
-        nameList.add("死ね");
+        nameList.add("⚪春天是向无人路过的樱花要一场午睡⚪");
+        nameList.add("⚪一切深情都是铺垫以后的悲情⚪");
+        nameList.add("⚪你将如闪电般归来⚪");
+        nameList.add("⚪黎明悄悄划过天边 谁的身影穿梭轮回间⚪");
+        nameList.add("⚪人生即是旅途 我们都在路上⚪");
+        nameList.add("⚪长枪刺破云霞 放下一生牵挂⚪");
     }
     public static void spawnMob(final Player player, final int radius, final int maxTryTime) {
         final EntityType entityType = randomMob();
+        int t = new Random().nextInt(50)-1;
+        String name = null;
+        if(nameList.get(t)!=null){
+            name = nameList.get(t);
+        }else {
+            name = player.getDisplayName();
+        }
         for (int i = 0; i < maxTryTime; ++i) {
             final Location spawnLoc = randomLocation(player.getLocation(), radius);
             final Material downType = spawnLoc.getWorld().getBlockAt(spawnLoc).getType();
             final Material upType = spawnLoc.getWorld().getBlockAt(spawnLoc.add(0.0, 1.0, 0.0)).getType();
             if ((downType.isAir() || !downType.isSolid()) && (upType.isAir() || !upType.isSolid())) {
-                spawnEntity(entityType, spawnLoc.add(0.0, -1.0, 0.0));
+                spawnEntity(entityType, spawnLoc.add(0.0, -1.0, 0.0), name);
                 return;
             }
         }
-        spawnEntity(entityType, getLocation(entityType, player.getLocation(), radius));
+        spawnEntity(entityType, getLocation(entityType, player.getLocation(), radius), name);
     }
 
     public static boolean spawnBossEntity(final Player player, final int radius){
         if (boss_wither == null){
             return false;
         }
-        spawnEntity(boss_wither, getLocation(boss_wither, player.getLocation(), radius));
+        spawnEntity(boss_wither, getLocation(boss_wither, player.getLocation(), radius), null);
         return true;
     }
 
-    public static void spawnEntity(final EntityType entityType, final Location location) {
+    public static void spawnEntity(final EntityType entityType, final Location location, String name) {
 
         if (HuyaHandlerMain.instance.getConfig().getBoolean("enableItemDrops", false)) {
             ItemSpawnUtils.spawnRandomItem(location);
@@ -65,9 +72,8 @@ public class MobSpawnUtils
                     }
                     else {
                         LivingEntity livingEntity = (LivingEntity) location.getWorld().spawnEntity(location, entityType);
-                        int i = new Random().nextInt(20)-1;
-                        if(nameList.get(i)!=null){
-                            livingEntity.setCustomName(nameList.get(i));
+                        if (name!=null){
+                            livingEntity.setCustomName(name);
                             livingEntity.setCustomNameVisible(true);
                         }
                     }
