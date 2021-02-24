@@ -2,11 +2,14 @@ package org.liuscraft.huyahandler;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.java_websocket.enums.ReadyState;
@@ -190,6 +193,51 @@ public class HuyaHandlerMain extends JavaPlugin {
                 Player player = (Player) sender;
                 Location location = deathLocationList.get(args[1]);
                 if (location!=null){
+                    List<String> deathTpf = getConfig().getStringList("deathTp");
+                    if (deathTpf!=null&&deathTpf.size()>0){
+                        int i = 0;
+                        Inventory inventory = player.getInventory();
+                        boolean tjok = false;
+                        for (; i < deathTpf.size(); i++) {
+                            String[] sl = deathTpf.get(i).split(":");
+                            if (sl.length==2){
+                                int amount = Integer.parseInt(sl[1]);
+                                if ("exp".equalsIgnoreCase(sl[0])){
+                                    if (player.getLevel()>amount) {
+                                        player.setLevel(player.getLevel()-amount);
+                                        MessageUtils.send("消耗了 " + sl[1] + "经验等级 来传送到死亡点", player);
+                                        tjok = true;
+                                        break;
+                                    }
+                                }else {
+                                    for (int i1 = 0; i1 < inventory.getSize(); i1++) {
+                                        final ItemStack itemStack = inventory.getItem(i1);
+                                        if (itemStack==null||itemStack.getType()==Material.AIR)
+                                            continue;
+                                        Material material = Material.getMaterial(sl[0]);
+                                        if (material==null)
+                                            break;
+                                        if (itemStack.getType()==material&&itemStack.getAmount()>=amount){
+                                            if (itemStack.getAmount()==amount){
+                                                inventory.remove(itemStack);
+                                            }else {
+                                                itemStack.setAmount(itemStack.getAmount()-1);
+                                                inventory.setItem(i1, itemStack);
+                                            }
+                                            tjok = true;
+                                            MessageUtils.send("消耗了 "+sl[1]+"个 ["+sl[0]+"] 来传送到死亡点", player);
+                                            break;
+                                        }
+                                    }
+                                }
+
+                            }
+                        }
+                        if (!tjok){
+                            MessageUtils.send("您无法回到死亡位置，因为您没有足够的条件使用此功能！", player);
+                            return true;
+                        }
+                    }
                     deathLocationList.remove(args[1]);
                     if(player.teleport(location)){
                         MessageUtils.send("您已回到死亡的位置！", player);

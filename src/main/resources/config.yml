@@ -11,13 +11,13 @@ multiPlayer: true
 # 分享直播间来刷怪
 shareLiveNotice: true
 # 分享多少次一只怪
-shareCount: 5
+shareCount: 3
 # 是否显示直播间聊天信息
-showChat: false
+showChat: true
 # 根据金额来刷怪
 moneySpawner: true
 # 累计金额 (他与单个用户礼物金额刷怪不冲突，0代表不开启)
-totalMoneySpawner: 0
+totalMoneySpawner: 3000
 # 根据礼物来刷怪
 giftSpawner: false
 # 根据弹幕刷怪 (barrage内配置弹幕刷怪条件)
@@ -25,14 +25,20 @@ barrageSpawner: true
 # 一百条弹幕一只怪
 barrageCount: 100
 # 一只怪的金豆
-money: 1000
+money: 0
 # BOSS出现条件（累计>=多少金额)
-totalMoney: 1000000
+totalMoney: 500000
+
+# 死亡后点击传送到死亡点需要消耗什么？(不写则不消化)
+deathTp:
+  - "exp:20" # 消耗20经验 或
+  - "DIAMOND:1" # 消耗 1 钻石 或...
 
 # 礼物的信息 [礼物ID;价值金额;礼物名称]
 gift:
   #- "4;10;虎粮"
-  - "20114;100;炮竹"
+  - "20114;100;彩灯"
+  - "20509;6600;孔明灯"
   - "20493;6600;糖豆车"
   - "20495;1000000;银河之光"
   - "20206;100;荧光棒"

@@ -33,7 +33,7 @@ public class MobSpawnUtils
         final EntityType entityType = randomMob();
         int t = new Random().nextInt(50)-1;
         String name = null;
-        if(nameList.get(t)!=null){
+        if(t<nameList.size()){
             name = nameList.get(t);
         }else {
             name = player.getDisplayName();
@@ -66,7 +66,6 @@ public class MobSpawnUtils
         if (!HuyaHandlerMain.instance.getConfig().getBoolean("disableMonsters", false)) {
             new BukkitRunnable() {
                 public void run() {
-                    GiantEntity.spawn((Entity)new GiantEntity((World)((CraftWorld)location.getWorld()).getHandle()), location);
                     if (entityType == EntityType.GIANT) {
                         GiantEntity.spawn((Entity)new GiantEntity((World)((CraftWorld)location.getWorld()).getHandle()), location);
                     }
