@@ -3,17 +3,11 @@ package org.liuscraft.huyahandler;
 import com.alibaba.fastjson.JSONObject;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import org.apache.logging.log4j.message.Message;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Wither;
-import org.java_websocket.enums.ReadyState;
 import org.java_websocket.handshake.ServerHandshake;
 import org.liuscraft.huyahandler.utils.MessageUtils;
 import org.liuscraft.huyahandler.utils.MobSpawnUtils;
-import org.liuscraft.huyahandler.utils.ParamsUtil;
 
 import java.net.URI;
 import java.util.*;
