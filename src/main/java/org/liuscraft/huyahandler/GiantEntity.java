@@ -11,11 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class GiantEntity extends EntityZombie
+public class GiantEntity extends EntityGiantZombie
 {
 
     public GiantEntity(final World var1) {
-        super(EntityTypes.ZOMBIE, var1);
+        super(EntityTypes.GIANT, var1);
     }
 
     public static void spawn(final Entity entity, final Location location) {

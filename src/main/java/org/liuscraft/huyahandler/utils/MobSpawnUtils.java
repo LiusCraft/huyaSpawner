@@ -55,14 +55,13 @@ public class MobSpawnUtils
         if (!HuyaHandlerMain.instance.getConfig().getBoolean("disableMonsters", false)) {
             new BukkitRunnable() {
                 public void run() {
-                    GiantEntity.spawn((Entity)new GiantEntity((World)((CraftWorld)location.getWorld()).getHandle()), location);
                     if (entityType == EntityType.GIANT) {
                         GiantEntity.spawn((Entity)new GiantEntity((World)((CraftWorld)location.getWorld()).getHandle()), location);
                     }
                     else {
                         LivingEntity livingEntity = (LivingEntity) location.getWorld().spawnEntity(location, entityType);
-                        int i = new Random().nextInt(20)-1;
-                        if(nameList.get(i)!=null){
+                        int i = new Random().nextInt(50)-1;
+                        if(i<nameList.size()){
                             livingEntity.setCustomName(nameList.get(i));
                             livingEntity.setCustomNameVisible(true);
                         }
