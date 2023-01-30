@@ -14,6 +14,7 @@ shareLiveNotice: true
 shareCount: 3
 # 是否显示直播间聊天信息
 showChat: true
+showChatIF: "p[夏天]g[1]"
 # 根据金额来刷怪
 moneySpawner: true
 # 累计金额 (他与单个用户礼物金额刷怪不冲突，0代表不开启)
@@ -24,6 +25,8 @@ giftSpawner: false
 barrageSpawner: true
 # 一百条弹幕一只怪
 barrageCount: 100
+# 弹幕条件
+barrageSpawnerIF: "p[夏天]g[1]"
 # 一只怪的金豆
 money: 0
 # BOSS出现条件（累计>=多少金额)
@@ -35,6 +38,9 @@ deathTp:
   - "DIAMOND:1" # 消耗 1 钻石 或...
 
 # 礼物的信息 [礼物ID;价值金额;礼物名称]
+# 下面是达到要求清除怪物
+nogift: []
+# 下面是达到要求召唤怪物
 gift:
   #- "4;10;虎粮"
   - "20114;100;彩灯"
@@ -65,9 +71,9 @@ gift:
 monsterLocation:
   - "creeper;1"
 
-# 弹幕刷怪条件表 [弹幕内容;出现次数] (条件成立即可出现一只怪)
+# 弹幕刷怪条件表 [弹幕内容;出现次数;p[夏天]g[1]] (条件成立即可出现一只怪)
 barrage:
-  - "海草;500"
+  - "海草;500;p[夏天]g[1]s!"
   - "六芒猫;500"
 
 # 下面是根据 BiliFansAction 插件来的功能

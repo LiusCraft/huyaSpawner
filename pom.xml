@@ -1,0 +1,101 @@
+<project xmlns = "http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation = "http://maven.apache.org/POM/4.0.0
+    http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <!-- 模型版本 -->
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- 公司或者组织的唯一标志，并且配置时生成的路径也是由此生成， 如com.companyname.project-group，maven会将该项目打成的jar包放本地路径：/com/companyname/project-group -->
+    <groupId>org.liuscraft.huyahandler</groupId>
+
+    <!-- 项目的唯一ID，一个groupId下面可能多个项目，就是靠artifactId来区分的 -->
+    <artifactId>huyaSpawner</artifactId>
+    <properties>
+        <java.version>1.8</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <!-- 版本号 -->
+    <version>1.0</version>
+    <repositories>
+        <repository>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+        </repository>
+        <repository>
+            <id>dmulloy2-repo</id>
+            <url>https://repo.dmulloy2.net/repository/public/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>1.19-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot</artifactId>
+            <version>1.19-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>2.0.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.java-websocket</groupId>
+            <artifactId>Java-WebSocket</artifactId>
+            <version>1.5.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>4.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.comphenix.protocol</groupId>
+            <artifactId>ProtocolLib</artifactId>
+            <version>4.8.0</version>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+    </build>
+</project>

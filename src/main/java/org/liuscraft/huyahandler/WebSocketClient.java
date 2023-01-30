@@ -6,9 +6,12 @@ import com.auth0.jwt.algorithms.Algorithm;
 import org.apache.logging.log4j.message.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Wither;
+import org.bukkit.Difficulty;
+import org.bukkit.World;
+import org.bukkit.entity.*;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.scheduler.BukkitTask;
 import org.java_websocket.enums.ReadyState;
 import org.java_websocket.handshake.ServerHandshake;
 import org.liuscraft.huyahandler.utils.MessageUtils;
@@ -46,9 +49,10 @@ public class WebSocketClient extends org.java_websocket.client.WebSocketClient {
 
     @Override
     public void onMessage(String arg0) {
-    	//System.out.println("-------- 接收到服务端数据： " + arg0 + "--------");
+
     	try {
         	JSONObject res = JSONObject.parseObject(arg0);
+            System.out.println("-------- 接收到服务端数据： " +res + "--------");
         	if("command".equals(res.getString("notice"))) {//监听成功回包
         		//System.out.println("-------- 监听事件： " + res.getJSONObject("data").getJSONArray("data") + " 成功--------");
         	}
@@ -82,80 +86,118 @@ public class WebSocketClient extends org.java_websocket.client.WebSocketClient {
                 //		,badgeName,fansLevel,giftId,nobleLevel,roomId,sendItemCount,sendNick,senderLevel));
 
                 GiftEntity giftEntity = HuyaHandlerMain.giftList.get(giftId);
-                if (giftEntity==null){
-                    //MessageUtils.send("未知的礼物"+giftId);
-                    return;
-                }
-                int gwSize = 0;
+                GiftEntity noGiftEntity = HuyaHandlerMain.noGiftList.get(giftId);
 
-                if (HuyaHandlerMain.moneySp){
-                    HuyaHandlerMain.money += giftEntity.getMoney()*sendItemCount;
-                    int i;
-                    if (HuyaHandlerMain.baseMoney>0){
-                        for (i = 0; i < HuyaHandlerMain.money / HuyaHandlerMain.baseMoney; i++) {
-                            if (HuyaHandlerMain.instance.getConfig().getBoolean("multiPlayer")){
-                                player = onlinePlayers.toArray(new Player[0])[new Random().nextInt(onlinePlayers.size())];
+                if (noGiftEntity !=null && sendItemCount>= noGiftEntity.getMoney()) {
+                    String giftEntityName = noGiftEntity.getName();
+                    Bukkit.getScheduler().runTask(HuyaHandlerMain.instance, () -> {
+                        for (World world : HuyaHandlerMain.instance.getServer().getWorlds()) {
+                            for (Entity entity : world.getEntities()) {
+                                if (entity instanceof Monster || entity instanceof Slime || entity instanceof Ghast || entity instanceof Shulker || entity instanceof Phantom) {
+                                    if (entity.getType() == EntityType.ENDER_DRAGON) continue;
+                                    entity.remove();
+                                }
                             }
-                            gwSize++;
-                            MobSpawnUtils.spawnMob(player, radius, maxTryTimes);
                         }
-                    }
-                    //MessageUtils.send("用户:"+sendNick+"赠送了价值"+HuyaHandlerMain.money+"的礼物");
-                    HuyaHandlerMain.totalMoney += HuyaHandlerMain.money;
-                    HuyaHandlerMain.totalMoneys += HuyaHandlerMain.money;
-                    HuyaHandlerMain.money = 0;
-                    int totalMoneySpawner = HuyaHandlerMain.instance.getConfig().getInt("totalMoneySpawner");
-                    int totalMoney = HuyaHandlerMain.instance.getConfig().getInt("totalMoney", 0);
-                    if (totalMoney>0&&HuyaHandlerMain.totalMoney % totalMoney == 0){
-                        Player player2 = player;
-                        if (r<(onlinePlayers.size()-1)){
-                            player2 = onlinePlayers.toArray(new Player[0])[r+1];
-                        }else if (r>0){
-                            player2 = onlinePlayers.toArray(new Player[0])[r-1];
-                        }
-                        if (MobSpawnUtils.spawnBossEntity(player2, radius)){
-                            gwSize++;
-                            MessageUtils.sendTitle("&c注意 &a"+player2.getDisplayName(), "BOSS将出现在"+player2.getDisplayName()+"的身边，请赶紧前往帮助TA吧！", 1, 5, 1);
-                        }else {
-                            MessageUtils.send("&c&l召唤BOSS发生了错误...");
-                        }
-                    }
-                    if (totalMoneySpawner>0){
-                        for (i = 0; i < HuyaHandlerMain.totalMoneys / totalMoneySpawner; i++) {
-                            if (HuyaHandlerMain.instance.getConfig().getBoolean("multiPlayer")){
-                                player = onlinePlayers.toArray(new Player[0])[new Random().nextInt(onlinePlayers.size())];
+                        MessageUtils.sendActionBar("清除怪物","§f[§a§l"+sendNick+"§f] §6§l赠送了 §c§l"+giftEntityName+" "+sendItemCount+"个 §6§l因此清除了世界上的怪物！", 3);
+                    });
+
+
+
+
+                }
+                if (giftEntity !=null) {
+                    int gwSize = 0;
+
+                    if (HuyaHandlerMain.moneySp){
+                        HuyaHandlerMain.money += giftEntity.getMoney()*sendItemCount;
+                        int i;
+                        if (HuyaHandlerMain.baseMoney>0){
+                            for (i = 0; i < HuyaHandlerMain.money / HuyaHandlerMain.baseMoney; i++) {
+                                if (HuyaHandlerMain.instance.getConfig().getBoolean("multiPlayer")){
+                                    player = onlinePlayers.toArray(new Player[0])[new Random().nextInt(onlinePlayers.size())];
+                                }
+                                gwSize++;
+                                MobSpawnUtils.spawnMob(player, radius, maxTryTimes);
                             }
-                            gwSize++;
-                            MobSpawnUtils.spawnMob(player, radius, maxTryTimes);
+                            if (gwSize>0){
+                                MessageUtils.sendActionBar("召唤怪物","§f[§a§l"+sendNick+"§f] §6§l赠送了 §c§l"+giftEntity.getName()+" "+sendItemCount+"个，因达到阈值而 §6§l召唤了 §c§l"+gwSize+" §6§l只怪！", 3);
+                            }
                         }
-                        HuyaHandlerMain.totalMoneys = 0;
+                        //MessageUtils.send("用户:"+sendNick+"赠送了价值"+HuyaHandlerMain.money+"的礼物");
+                        HuyaHandlerMain.totalMoney += HuyaHandlerMain.money;
+                        HuyaHandlerMain.totalMoneys += HuyaHandlerMain.money;
+                        HuyaHandlerMain.money = 0;
+                        int totalMoneySpawner = HuyaHandlerMain.instance.getConfig().getInt("totalMoneySpawner");
+                        int totalMoney = HuyaHandlerMain.instance.getConfig().getInt("totalMoney", 0);
+                        if (totalMoney>0&&HuyaHandlerMain.totalMoney % totalMoney == 0){
+                            Player player2 = player;
+                            if (r<(onlinePlayers.size()-1)){
+                                player2 = onlinePlayers.toArray(new Player[0])[r+1];
+                            }else if (r>0){
+                                player2 = onlinePlayers.toArray(new Player[0])[r-1];
+                            }
+                            if (MobSpawnUtils.spawnBossEntity(player2, radius)){
+                                gwSize++;
+                                MessageUtils.sendTitle("§c注意！§eBOSS出现了", "BOSS将出现在["+player2.getDisplayName()+"]的身边，请赶紧前往帮助TA吧！", 3);
+                            }else {
+                                MessageUtils.send("§c§l召唤BOSS发生了错误...");
+                            }
+                        }
+                        if (totalMoneySpawner>0){
+                            for (i = 0; i < HuyaHandlerMain.totalMoneys / totalMoneySpawner; i++) {
+                                if (HuyaHandlerMain.instance.getConfig().getBoolean("multiPlayer")){
+                                    player = onlinePlayers.toArray(new Player[0])[new Random().nextInt(onlinePlayers.size())];
+                                }
+                                gwSize++;
+                                MobSpawnUtils.spawnMob(player, radius, maxTryTimes);
+                            }
+                            HuyaHandlerMain.totalMoneys = 0;
+                        }
                     }
+                    if (HuyaHandlerMain.giftSp){
+                        if (HuyaHandlerMain.baseMoney>0){
+                            int i;
+                            int count = (int) (giftEntity.getMoney() * sendItemCount / HuyaHandlerMain.baseMoney);
+                            for (i = 0; i < count; i++) {
+                                if (HuyaHandlerMain.instance.getConfig().getBoolean("multiPlayer")){
+                                    player = onlinePlayers.toArray(new Player[0])[new Random().nextInt(onlinePlayers.size())];
+                                }
+                                gwSize++;
+                                MobSpawnUtils.spawnMob(player, radius, maxTryTimes);
+                            }
+                        }
+                        MobSpawnUtils.spawnMob(player, radius, maxTryTimes);
+                        if (gwSize>0){
+                            MessageUtils.sendActionBar("召唤怪物","§f[§a§l"+sendNick+"§f] §6§l赠送了 §c§l"+giftEntity.getName()+" "+sendItemCount+"个 §6§l召唤了 §c§l"+gwSize+" §6§l只怪！", 3);
+                        }
+                    }
+
                 }
-                if (HuyaHandlerMain.giftSp){
-                    gwSize++;
-                    MobSpawnUtils.spawnMob(player, radius, maxTryTimes);
-                }
-                if (gwSize==0){
-                    return;
-                }
-                MessageUtils.sendActionBar("&f[&a&l"+sendNick+"&f] §6§l赠送了 §c§l"+giftEntity.getName()+" "+sendItemCount+"个 §6§l召唤了 §c§l"+gwSize+" §6§l只怪！", 3, true);
+
+
                 //MessageUtils.sendTitle(player, "&c注意", "怪物在你身边！！！", 1, 3,1);
         	}
         	if ("getMessageNotice".equals(res.get("notice"))){
                 JSONObject data = JSONObject.parseObject(arg0).getJSONObject("data");
 
                 if (HuyaHandlerMain.instance.getConfig().getBoolean("barrageSpawner")){
-                    HuyaHandlerMain.barrageCount++;
-                    if (HuyaHandlerMain.barrageCount % HuyaHandlerMain.instance.getConfig().getInt("barrageCount") == 0){
+                    if(MessageUtils.checkIF(HuyaHandlerMain.instance.getConfig().getString("barrageSpawnerIF"), data.getString("badgeName"), data.getIntValue("nobleLevel"), data.getIntValue("msgType")))
+                        HuyaHandlerMain.barrageCount++;
+                    if (HuyaHandlerMain.barrageCount>0 && HuyaHandlerMain.barrageCount % HuyaHandlerMain.instance.getConfig().getInt("barrageCount") == 0){
                         // 刷怪
-                        MessageUtils.sendActionBar("因为观众们在直播间说了"+HuyaHandlerMain.instance.getConfig().getInt("barrageCount")+"句话，所以生成了 1 只怪", 3,true);
+                        MessageUtils.sendActionBar("召唤怪物","因为观众们在直播间说了"+HuyaHandlerMain.instance.getConfig().getInt("barrageCount")+"句话而召唤出一只怪物", 3);
                         MobSpawnUtils.spawnMob(player, radius, maxTryTimes);
                     }
                     List<String> barrageList = HuyaHandlerMain.instance.getConfig().getStringList("barrage");
                     if (barrageList!=null){
                         for (String s : barrageList) {
                             String[] sp = s.split(";");
-                            if (sp.length==2){
+                            if (sp.length>1){
+                                if (sp.length==3) {
+                                    if(!MessageUtils.checkIF(sp[2], data.getString("badgeName"), data.getIntValue("nobleLevel"), data.getIntValue("msgType")))
+                                        continue;
+                                }
                                 if (!data.getString("content").contains(sp[0])){
                                     continue;
                                 }
@@ -166,7 +208,7 @@ public class WebSocketClient extends org.java_websocket.client.WebSocketClient {
                                     count++;
                                 }
                                 if (count.intValue() >= Integer.parseInt(sp[1])){
-                                    MessageUtils.sendActionBar("因大家都说 "+sp[0]+"，所以要来一只怪物了！", 3,true);
+                                    MessageUtils.sendActionBar("召唤怪物","因大家都说 "+sp[0]+"，所以要来一只怪物了！", 3);
                                     MobSpawnUtils.spawnMob(player, radius, maxTryTimes);
                                     count = 0;
                                 }
@@ -176,16 +218,17 @@ public class WebSocketClient extends org.java_websocket.client.WebSocketClient {
                         }
                     }
                 }
-                if (!HuyaHandlerMain.instance.getConfig().getBoolean("showChat")){
-                    return;
+                if (HuyaHandlerMain.instance.getConfig().getBoolean("showChat")
+                        && MessageUtils.checkIF(HuyaHandlerMain.instance.getConfig().getString("showChatIF"), data.getString("badgeName"), data.getIntValue("nobleLevel"), data.getIntValue("msgType"))){
+                    MessageUtils.send("["+data.getInteger("fansLevel")+"级]"+data.getString("sendNick")+": "+data.getString("content"));
                 }
-                MessageUtils.send("["+data.getInteger("fansLevel")+"级]"+data.getString("sendNick")+": "+data.getString("content"));
+
             }
             if ("getShareLiveNotice".equals(res.get("notice"))&&HuyaHandlerMain.instance.getConfig().getBoolean("shareLiveNotice")){
                 JSONObject data = JSONObject.parseObject(arg0).getJSONObject("data");
                 HuyaHandlerMain.sharerCount++;
                 if (HuyaHandlerMain.sharerCount>=HuyaHandlerMain.instance.getConfig().getInt("shareCount")){
-                    MessageUtils.sendActionBar("因分享了"+HuyaHandlerMain.sharerCount+"次直播间，要来一只怪物了！", 3, true);
+                    MessageUtils.sendActionBar("召唤怪物", "因分享了"+HuyaHandlerMain.sharerCount+"次直播间而召唤了一只怪物！", 3);
                     MobSpawnUtils.spawnMob(player, radius, maxTryTimes);
                     HuyaHandlerMain.sharerCount = 0;
                 }

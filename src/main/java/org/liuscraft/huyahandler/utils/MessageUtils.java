@@ -1,5 +1,10 @@
 package org.liuscraft.huyahandler.utils;
 
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -51,91 +56,62 @@ public class MessageUtils
      * @param stay 持续秒
      * @param fadeout 渐出时间
      */
-    public static void sendTitle(final String maintitle, final String subtitle, final int fadein, final int stay, final int fadeout) {
+    public static void sendTitle(final String title, final String message, int time) {
         for (final Player player : HuyaHandlerMain.instance.getServer().getOnlinePlayers()) {
-            sendTitle(player, maintitle, subtitle, fadein, stay, fadeout);
+            sendTitle(title, message, player, 10, 20*time, 20);
         }
     }
 
-    public static void sendActionBar(final String message, final int time, boolean await){
-        if (await){
-            new Thread(new Runnable() {
-                public void run() {
-                    while (HuyaHandlerMain.actionBarAwait==false) {
-                        break;
-                    }
-                    HuyaHandlerMain.actionBarAwait = false;
-                    sendActionBar(message, time);
-                    HuyaHandlerMain.actionBarAwait = true;
-                    try {
-                        Thread.sleep(time*1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    HuyaHandlerMain.actionBarAwait = false;
-                }
-            }).start();
-        }else {
-            HuyaHandlerMain.actionBarAwait=false;
-            sendActionBar(message, time);
+    public static void sendActionBar(final String title, final String message, int time){
+        for (final Player player : Bukkit.getOnlinePlayers()) {
+            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(title +" >>> "+message));
         }
     }
-
-    public static void sendActionBar(final String message, int time){
-        if (!HuyaHandlerMain.actionBarAwait){
-            for (final Player player : Bukkit.getOnlinePlayers()) {
-                sendActionBar(message, player, time);
-            }
-        }
-    }
-    public static void sendActionBar(final String m, final Player player, int time) {
-        if (time < 3) {
-            time = 3;
-        }
-        final int finalTime = time;
-        new BukkitRunnable() {
-            int i = 0;
-
-            public void run() {
-                try {
-                    final String version = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
-                    final Field playerConnection = Class.forName("net.minecraft.server." + version + ".EntityPlayer").getField("playerConnection");
-                    final Class<?> packetPlayOutChat = Class.forName("net.minecraft.server." + version + ".PacketPlayOutChat");
-                    final Method send = Class.forName("net.minecraft.server." + version + ".PlayerConnection").getMethod("sendPacket", Class.forName("net.minecraft.server." + version + ".Packet"));
-                    final Method getHandle = Class.forName("org.bukkit.craftbukkit." + version + ".entity.CraftPlayer").getMethod("getHandle", (Class<?>[])new Class[0]);
-                    final Class<?> iChatBaseComponent = Class.forName("net.minecraft.server." + version + ".IChatBaseComponent");
-                    final Class<?> chatComponentText = Class.forName("net.minecraft.server." + version + ".ChatComponentText");
-                    final Class<?> chatMessageType = Class.forName("net.minecraft.server." + version + ".ChatMessageType");
-                    Enum e = null;
-                    for (final Enum inside_enum : (Enum[])chatMessageType.getEnumConstants()) {
-                        if (inside_enum.name().equalsIgnoreCase("GAME_INFO")) {
-                            e = inside_enum;
-                            break;
-                        }
-                    }
-                    final Object message = chatComponentText.getConstructor(String.class).newInstance(ChatColor.translateAlternateColorCodes('&', m.replace("null", "")));
-                    Object packet;
-                    try {
-                        packet = packetPlayOutChat.getConstructor(iChatBaseComponent, chatMessageType).newInstance(message, e);
-                    }
-                    catch (Exception a) {
-                        packet = packetPlayOutChat.getConstructor(iChatBaseComponent, chatMessageType, player.getUniqueId().getClass()).newInstance(message, e, player.getUniqueId());
-                    }
-                    send.invoke(playerConnection.get(getHandle.invoke(player, new Object[0])), packet);
-                }
-                catch (Exception e2) {
-                    e2.printStackTrace();
-                    player.sendMessage("§c版本/服务端不兼容！");
-                }
-                ++this.i;
-                if (this.i >= finalTime - 2) {
-                    this.cancel();
-                }
-            }
-        }.runTaskTimerAsynchronously(HuyaHandlerMain.instance, 0L, 20L);
+    public static void sendTitle(final String t, final String m, final Player player, int fadeIn, int stay, int fadeOut) {
+        player.sendTitle(t,m,fadeIn, stay, fadeOut);
     }
 
     public static String handleColor(final String text) {
         return ChatColor.translateAlternateColorCodes('&', text);
     }
+
+
+    public static boolean checkIF(String message, String p, Integer g, Integer l) {
+
+        if (l.intValue() != 2)
+            if (message.indexOf("p[") !=-1 && message.indexOf("p["+p+"]")==-1) return false;
+        if (l.intValue() != 2 && message.indexOf("s!")!=-1) return false;
+        if (message.indexOf("g[") !=-1 && g.intValue()<Integer.parseInt(getSubString(message, "g[","]"))) return false;
+
+        return true;
+    }
+    /**
+     * 取两个文本之间的文本值
+     * @param text 源文本 比如：欲取全文本为 12345
+     * @param left 文本前面
+     * @param right  后面文本
+     * @return 返回 String
+     */
+    public static String getSubString(String text, String left, String right) {
+        String result = "";
+        int zLen;
+        if (left == null || left.isEmpty()) {
+            zLen = 0;
+        } else {
+            zLen = text.indexOf(left);
+            if (zLen > -1) {
+                zLen += left.length();
+            } else {
+                zLen = 0;
+            }
+        }
+        int yLen = text.indexOf(right, zLen);
+        if (yLen < 0 || right == null || right.isEmpty()) {
+            yLen = text.length();
+        }
+        result = text.substring(zLen, yLen);
+        return result;
+    }
+
+
 }

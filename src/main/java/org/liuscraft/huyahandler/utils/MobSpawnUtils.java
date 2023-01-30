@@ -1,14 +1,11 @@
 package org.liuscraft.huyahandler.utils;
 
-import net.minecraft.server.v1_16_R3.Entity;
-import net.minecraft.server.v1_16_R3.World;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
+import org.bukkit.World;
 import org.bukkit.entity.*;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.liuscraft.huyahandler.GiantEntity;
 import org.liuscraft.huyahandler.HuyaHandlerMain;
 
 import java.util.ArrayList;
@@ -31,7 +28,7 @@ public class MobSpawnUtils
     }
     public static void spawnMob(final Player player, final int radius, final int maxTryTime) {
         final EntityType entityType = randomMob();
-        int t = new Random().nextInt(50)-1;
+        int t = new Random().nextInt(50);
         String name = null;
         if(t<nameList.size()){
             name = nameList.get(t);
@@ -67,7 +64,7 @@ public class MobSpawnUtils
             new BukkitRunnable() {
                 public void run() {
                     if (entityType == EntityType.GIANT) {
-                        GiantEntity.spawn((Entity)new GiantEntity((World)((CraftWorld)location.getWorld()).getHandle()), location);
+//                        GiantEntity.spawn((Entity)new GiantEntity((World)((CraftWorld)location.getWorld()).getHandle()), location);
                     }
                     else {
                         LivingEntity livingEntity = (LivingEntity) location.getWorld().spawnEntity(location, entityType);

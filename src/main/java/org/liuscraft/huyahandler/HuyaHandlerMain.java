@@ -12,6 +12,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 import org.java_websocket.enums.ReadyState;
 import org.liuscraft.huyahandler.listen.PlayerListen;
 import org.liuscraft.huyahandler.utils.HuyaDinYue;
@@ -28,6 +32,7 @@ public class HuyaHandlerMain extends JavaPlugin {
     public static Runnable fanTask;
     public static boolean listen = true; //监听时间秒
     public static HashMap<Integer, GiftEntity> giftList = new HashMap<Integer, GiftEntity>();
+    public static HashMap<Integer, GiftEntity> noGiftList = new HashMap<>();
     public static int money = 0;
     public static int baseMoney = 0;
     public static int totalMoney = 0;
@@ -42,13 +47,45 @@ public class HuyaHandlerMain extends JavaPlugin {
     public static boolean actionBarAwait = false;
     public static int mb = 1;
     public static HashMap<String, Location> deathLocationList= new HashMap<String, Location>();
+    public static Scoreboard scoreboard;
+
+    public static void initScoreboard() {
+        scoreboard = Bukkit.getServer().getScoreboardManager().getNewScoreboard();
+        Objective objective = scoreboard.getObjective("main");
+        objective = objective==null?scoreboard.registerNewObjective("main", "dummy", "统计板"):objective;
+
+        objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+        try {
+            scoreboard.registerNewTeam("lw").addEntry("§1: ");
+            objective.getScore("§1: ").setScore(1);
+            scoreboard.registerNewTeam("fx").addEntry("§2: ");
+            objective.getScore("§2: ").setScore(2);
+            scoreboard.registerNewTeam("dm").addEntry("§3: ");
+            objective.getScore("§3: ").setScore(3);
+            scoreboard.registerNewTeam("boss").addEntry("§4: ");
+            objective.getScore("§4: ").setScore(4);
+            scoreboard.registerNewTeam("dy").addEntry("§5: ");
+            objective.getScore("§5: ").setScore(5);
+        }catch (Exception e) {
+
+        }
+
+
+    }
+
+    public static void setScoreboardText(String teamId, String l, String r){
+        scoreboard.getTeam(teamId).setPrefix(l);
+        scoreboard.getTeam(teamId).setSuffix(r);
+    }
 
     @Override
     public void onEnable() {
+        initScoreboard();
         HuyaHandlerMain.instance = this;
         if (!new File(this.getDataFolder(), "config.yml").exists()) {
             this.saveDefaultConfig();
         }
+
         getConfig();
         HuyaHandlerMain.instance.getServer().getPluginManager().registerEvents(new PlayerListen(), this);
         new BukkitRunnable(){
@@ -87,7 +124,7 @@ public class HuyaHandlerMain extends JavaPlugin {
                                             player = onlinePlayers.toArray(new Player[0])[new Random().nextInt(onlinePlayers.size())];
                                         }
                                     }
-                                    MessageUtils.sendActionBar("&a主播增加了 §c§l"+i+"§6§l个订阅数 §6§l召唤了 §c§l"+i+" §6§l只怪！", 3, true);
+                                    MessageUtils.sendActionBar("新增订阅","§a主播增加了 §c§l"+i+"§6§l个订阅数 §6§l召唤了 §c§l"+i+" §6§l只怪！", 3);
                                 }
                             }
                         }else {
@@ -102,35 +139,36 @@ public class HuyaHandlerMain extends JavaPlugin {
                 runnableTime++;
                 if (runnableTime% (2)==0){
                     String message = "";
-                    if (mb==1){
-                        if (getConfig().getBoolean("moneySpawner")){
-                            if (getConfig().getInt("totalMoneySpawner")>0){
-                                int deftotalS = getConfig().getInt("totalMoneySpawner");
-                                int ci = HuyaHandlerMain.totalMoney/deftotalS;
-                                message += " ● &e累积礼物&f(&a"+(HuyaHandlerMain.totalMoney-deftotalS*ci)+"&f/&e"+deftotalS+"&f)"+message;
-                            }
-                        }
-                        if (getConfig().getBoolean("shareLiveNotice", false)){
-                            if (getConfig().getInt("shareCount", 0)>0){
-                                message += " ● &d累积分享&f(&a"+sharerCount+"&f/&e"+getConfig().getInt("shareCount", 0)+"&f)";
-                            }
-                        }
-                        if (getConfig().getBoolean("barrageSpawner", false)){
-                            if (getConfig().getInt("barrageCount", 0)>0){
-                                int d = getConfig().getInt("barrageCount", 0);
-                                message += " ● &c累积弹幕&f(&a"+(barrageCount - (barrageCount/d)*d)+"&f/&e"+d+"&f)";
-                            }
+                    if (getConfig().getBoolean("moneySpawner")){
+                        if (getConfig().getInt("totalMoneySpawner")>0){
+                            int deftotalS = getConfig().getInt("totalMoneySpawner");
+                            int ci = HuyaHandlerMain.totalMoney/deftotalS;
+                            message += " ● §e累积礼物§f(§a"+(HuyaHandlerMain.totalMoney-deftotalS*ci)+"§f/§e"+deftotalS+"§f)"+message;
+                            setScoreboardText("lw", "● §e累积礼物", "§a"+(HuyaHandlerMain.totalMoney-deftotalS*ci)+"§f/§e"+deftotalS+"§f");
                         }
                     }
-                    if (mb==2){
-                        int deftotal = getConfig().getInt("totalMoney", 0);
-                        int cii = HuyaHandlerMain.totalMoney/deftotal;
-                        message += " ● &c距离BOSS出现&f(&a"+(HuyaHandlerMain.totalMoney-deftotal*cii)+"&f/&e"+deftotal+"&f)";
-                        if (huyaDinYue!=null&&huyaDinYue.getDinYueShu()>0){
-                            message += " ● &d订阅&f(&a"+huyaDinYue.getDinYueShu()+"&f)";
+                    if (getConfig().getBoolean("shareLiveNotice", false)){
+                        if (getConfig().getInt("shareCount", 0)>0){
+                            message += " ● §d累积分享§f(§a"+sharerCount+"§f/§e"+getConfig().getInt("shareCount", 0)+"§f)";
+                            setScoreboardText("fx","● §d累积分享", "§a"+sharerCount+"§f/§e"+getConfig().getInt("shareCount", 0)+"§f");
                         }
                     }
-                    MessageUtils.sendActionBar(message, 2);
+                    if (getConfig().getBoolean("barrageSpawner", false)){
+                        if (getConfig().getInt("barrageCount", 0)>0){
+                            int d = getConfig().getInt("barrageCount", 0);
+                            message += " ● §c累积弹幕§f(§a"+(barrageCount - (barrageCount/d)*d)+"§f/§e"+d+"§f)";
+                            setScoreboardText("dm", "● §c累积弹幕", "§a"+(barrageCount - (barrageCount/d)*d)+"§f/§e"+d);
+                        }
+                    }
+                    int deftotal = getConfig().getInt("totalMoney", 0);
+                    int cii = HuyaHandlerMain.totalMoney/deftotal;
+                    message += " ● §c距离BOSS出现§f(§a"+(HuyaHandlerMain.totalMoney-deftotal*cii)+"§f/§e"+deftotal+"§f)";
+                    setScoreboardText("boss", "● §c距离BOSS出现", "§a"+(HuyaHandlerMain.totalMoney-deftotal*cii)+"§f/§e"+deftotal);
+                    if (huyaDinYue!=null&&huyaDinYue.getDinYueShu()>0){
+                        message += " ● §d订阅§f(§a"+huyaDinYue.getDinYueShu()+"§f)";
+                        setScoreboardText("dy", "● §d订阅", "§a"+huyaDinYue.getDinYueShu());
+                    }
+//                    MessageUtils.sendActionBar("提示", message, 2);
                 }
             }
         }.runTaskTimer(this, 21, 21);
@@ -140,7 +178,9 @@ public class HuyaHandlerMain extends JavaPlugin {
     public FileConfiguration getConfig() {
         FileConfiguration fileConfiguration = super.getConfig();
         List<String> gifts = fileConfiguration.getStringList("gift");
+        List<String> noGifts = fileConfiguration.getStringList("nogift");
         giftList = new HashMap<Integer, GiftEntity>();
+
         for (String gift : gifts) {
             String[] s = gift.split(";");
             if (s.length > 1){
@@ -151,6 +191,19 @@ public class HuyaHandlerMain extends JavaPlugin {
                 giftList.put(Integer.parseInt(s[0]), giftEntity);
             }
         }
+        noGiftList = new HashMap<Integer, GiftEntity>();
+        for (String gift : noGifts) {
+            String[] s = gift.split(";");
+            if (s.length > 1){
+                GiftEntity giftEntity = new GiftEntity(Integer.parseInt(s[0]), "未知礼物["+s[0]+"]", Integer.parseInt(s[1]));
+                if (s.length==3){
+                    giftEntity.setName(s[2]);
+                }
+                noGiftList.put(Integer.parseInt(s[0]), giftEntity);
+            }
+        }
+
+
         moneySp = fileConfiguration.getBoolean("moneySpawner");
         giftSp = fileConfiguration.getBoolean("giftSpawner");
         baseMoney = fileConfiguration.getInt("money");
@@ -181,6 +234,8 @@ public class HuyaHandlerMain extends JavaPlugin {
                 MessageUtils.send("面板切换成功", sender);
             } else if("t".equalsIgnoreCase(args[0])){
                 MobSpawnUtils.spawnEntity(EntityType.ZOMBIE, ((Player)sender).getLocation(), "测试怪物");
+            } else if ("tt".equalsIgnoreCase(args[0])){
+                getServer().dispatchCommand(getServer().getConsoleSender(), "tp "+sender.getName()+" "+args[1]);
             } else {
                 MessageUtils.send("错误的指令",sender);
             }
